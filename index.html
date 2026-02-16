@@ -1,589 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Riot Games Authorization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в Valorant</title>
+    <!-- Подключаем скрипт Telegram, чтобы Mini App работал -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #0f1923 0%, #1a2332 100%);
-            color: #fff;
-            min-height: 100vh;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        .container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+            align-items: center;
             padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-top: 20px;
         }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #ff4655 0%, #ff1744 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            box-shadow: 0 10px 30px rgba(255, 70, 85, 0.3);
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #8892a6;
-            font-size: 14px;
-        }
-
-        .auth-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 24px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .step {
-            margin-bottom: 24px;
-        }
-
-        .step-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .step-number {
-            width: 28px;
-            height: 28px;
-            background: #ff4655;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            margin-right: 12px;
-            font-size: 14px;
-        }
-
-        .step-title {
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .step-description {
-            color: #8892a6;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-left: 40px;
-        }
-
-        .region-selector {
-            margin-bottom: 20px;
-        }
-
-        .region-label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .region-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .region-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 14px;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .region-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .region-btn.selected {
-            background: rgba(255, 70, 85, 0.2);
-            border-color: #ff4655;
-        }
-
-        .login-btn {
+        .container {
+            max-width: 400px;
             width: 100%;
-            background: linear-gradient(135deg, #ff4655 0%, #ff1744 100%);
+        }
+        .btn {
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #fff);
             border: none;
+            padding: 12px 24px;
             border-radius: 12px;
-            padding: 16px;
-            color: #fff;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(255, 70, 85, 0.4);
-            margin-top: 20px;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(255, 70, 85, 0.5);
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .login-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .info-box {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 20px;
-        }
-
-        .info-box .icon {
-            margin-bottom: 8px;
-            font-size: 20px;
-        }
-
-        .info-box .title {
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .info-box .text {
-            color: #8892a6;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .loader {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .loader.active {
+            text-decoration: none;
             display: block;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+            transition: opacity 0.2s;
         }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #ff4655;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .success-container {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .success-container.active {
-            display: block;
-        }
-
-        .success-icon {
-            width: 80px;
+        .btn:active { opacity: 0.8; }
+        textarea {
+            width: 100%;
             height: 80px;
-            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 40px;
-        }
-
-        .error-container {
-            display: none;
-            background: rgba(244, 67, 54, 0.1);
-            border: 1px solid rgba(244, 67, 54, 0.3);
             border-radius: 12px;
-            padding: 16px;
-            margin-top: 20px;
-        }
-
-        .error-container.active {
-            display: block;
-        }
-
-        .error-title {
-            font-weight: 600;
-            color: #f44336;
-            margin-bottom: 8px;
-        }
-
-        .error-text {
+            border: 2px solid var(--tg-theme-hint-color, #ccc);
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            resize: none;
             font-size: 14px;
-            color: #8892a6;
+            margin-bottom: 10px;
         }
+        textarea:focus {
+            border-color: var(--tg-theme-button-color, #3390ec);
+            outline: none;
+        }
+        .step {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        h3 { margin-top: 0; font-size: 18px; margin-bottom: 10px;}
+        p { font-size: 14px; line-height: 1.4; margin-bottom: 10px; color: var(--tg-theme-hint-color, #555); }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="header">
-            <div class="logo">🎮</div>
-            <h1>Valorant Store Bot</h1>
-            <div class="subtitle">Вход через Riot Games</div>
+        <h2>Авторизация</h2>
+        
+        <div class="step">
+            <h3>Шаг 1. Вход</h3>
+            <p>Нажми кнопку, войди в аккаунт Riot. Когда увидишь белый экран или логотип — скопируй ссылку из браузера.</p>
+            <!-- Ссылка авторизации с параметрами -->
+            <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1&scope=account%20openid" target="_blank" class="btn">🚀 Открыть Riot Login</a>
         </div>
 
-        <div id="authForm" class="auth-container">
-            <div class="region-selector">
-                <label class="region-label">Выберите регион:</label>
-                <div class="region-grid">
-                    <button class="region-btn" data-region="eu">
-                        🇪🇺 Europe
-                    </button>
-                    <button class="region-btn" data-region="na">
-                        🇺🇸 NA
-                    </button>
-                    <button class="region-btn" data-region="ap">
-                        🌏 Asia Pacific
-                    </button>
-                    <button class="region-btn" data-region="kr">
-                        🇰🇷 Korea
-                    </button>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step-header">
-                    <div class="step-number">1</div>
-                    <div class="step-title">Нажмите "Войти через Riot"</div>
-                </div>
-                <div class="step-description">
-                    Откроется официальная страница авторизации Riot Games
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step-header">
-                    <div class="step-number">2</div>
-                    <div class="step-title">Войдите в свой аккаунт</div>
-                </div>
-                <div class="step-description">
-                    Используйте ваш email/username и пароль. Поддерживается 2FA
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step-header">
-                    <div class="step-number">3</div>
-                    <div class="step-title">Готово!</div>
-                </div>
-                <div class="step-description">
-                    После успешного входа токены будут переданы в бота
-                </div>
-            </div>
-
-            <button id="loginBtn" class="login-btn" disabled>
-                🔐 Войти через Riot Games
-            </button>
-
-            <div class="info-box">
-                <div class="icon">🔒</div>
-                <div class="title">Безопасность</div>
-                <div class="text">
-                    Ваш пароль передается только на серверы Riot Games.
-                    Бот получает только токены доступа и не видит ваш пароль.
-                </div>
-            </div>
-
-            <div id="errorContainer" class="error-container">
-                <div class="error-title">❌ Ошибка</div>
-                <div class="error-text" id="errorText"></div>
-            </div>
-        </div>
-
-        <div id="loader" class="loader">
-            <div class="spinner"></div>
-            <div style="color: #8892a6;">Авторизация...</div>
-        </div>
-
-        <div id="successContainer" class="success-container">
-            <div class="success-icon">✓</div>
-            <h2>Успешный вход!</h2>
-            <p style="color: #8892a6; margin-top: 10px;">
-                Данные отправлены в бота. Можете закрыть это окно.
-            </p>
+        <div class="step">
+            <h3>Шаг 2. Токен</h3>
+            <p>Вставь скопированную ссылку сюда:</p>
+            <textarea id="urlInput" placeholder="https://playvalorant.com/opt_in#access_token=..."></textarea>
+            
+            <button id="sendBtn" class="btn" style="background-color: #2ea043; display: none;">✅ Готово! Подключить</button>
         </div>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        tg.expand(); // Растягиваем на весь экран
 
-        // Применяем тему Telegram
-        document.body.style.background = tg.themeParams.bg_color || document.body.style.background;
+        const urlInput = document.getElementById('urlInput');
+        const sendBtn = document.getElementById('sendBtn');
 
-        let selectedRegion = null;
-        let authWindow = null;
-        let checkInterval = null;
-
-        // Выбор региона
-        document.querySelectorAll('.region-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.region-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                selectedRegion = btn.dataset.region;
-                document.getElementById('loginBtn').disabled = false;
-            });
-        });
-
-        // Кнопка входа
-        document.getElementById('loginBtn').addEventListener('click', async () => {
-            if (!selectedRegion) {
-                showError('Пожалуйста, выберите регион');
-                return;
-            }
-
-            try {
-                hideError();
-                startAuth();
-            } catch (error) {
-                showError(error.message);
+        // Слушаем ввод текста
+        urlInput.addEventListener('input', () => {
+            const text = urlInput.value;
+            // Показываем кнопку только если ссылка похожа на правильную
+            if (text.includes('access_token=') || text.includes('id_token=')) {
+                sendBtn.style.display = 'block';
+            } else {
+                sendBtn.style.display = 'none';
             }
         });
 
-        function startAuth() {
-            // Показываем loader
-            document.getElementById('authForm').style.display = 'none';
-            document.getElementById('loader').classList.add('active');
-
-            // Создаем параметры для OAuth
-            const clientId = 'play-valorant-web-prod';
-            const redirectUri = 'https://playvalorant.com/opt_in';
-            const responseType = 'token id_token';
-            const scope = 'account openid';
-            const nonce = Math.random().toString(36).substring(7);
-
-            // URL для авторизации Riot
-            const authUrl = `https://auth.riotgames.com/authorize?` +
-                `client_id=${clientId}&` +
-                `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-                `response_type=${responseType}&` +
-                `scope=${encodeURIComponent(scope)}&` +
-                `nonce=${nonce}`;
-
-            // Открываем окно авторизации
-            authWindow = window.open(authUrl, '_blank');
-
-            if (!authWindow) {
-                showError('Не удалось открыть окно авторизации. Разрешите всплывающие окна.');
-                document.getElementById('loader').classList.remove('active');
-                document.getElementById('authForm').style.display = 'block';
-                return;
-            }
-
-            // Проверяем URL каждые 500ms
-            checkInterval = setInterval(checkAuthWindow, 500);
-
-            // Таймаут на 5 минут
-            setTimeout(() => {
-                if (checkInterval) {
-                    clearInterval(checkInterval);
-                    if (authWindow && !authWindow.closed) {
-                        authWindow.close();
-                    }
-                    showError('Время авторизации истекло. Попробуйте снова.');
-                    document.getElementById('loader').classList.remove('active');
-                    document.getElementById('authForm').style.display = 'block';
-                }
-            }, 300000);
-        }
-
-        function checkAuthWindow() {
+        // Обработка нажатия "Готово"
+        sendBtn.addEventListener('click', () => {
+            const text = urlInput.value;
+            
             try {
-                if (!authWindow || authWindow.closed) {
-                    clearInterval(checkInterval);
-                    showError('Окно авторизации было закрыто');
-                    document.getElementById('loader').classList.remove('active');
-                    document.getElementById('authForm').style.display = 'block';
-                    return;
+                // Пытаемся распарсить ссылку
+                // Заменяем # на ? чтобы URL класс мог прочитать параметры
+                let cleanUrl = text.replace('#', '?'); 
+                const urlObj = new URL(cleanUrl);
+                const params = new URLSearchParams(urlObj.search);
+                
+                const accessToken = params.get('access_token');
+                
+                if (accessToken) {
+                    // Отправляем данные боту (в Python)
+                    const data = JSON.stringify({
+                        access_token: accessToken
+                    });
+                    tg.sendData(data);
+                } else {
+                    tg.showAlert('В ссылке нет токена! Убедитесь, что скопировали всё.');
                 }
-
-                // Пытаемся получить URL (сработает только если домен тот же или есть CORS)
-                let currentUrl = '';
-                try {
-                    currentUrl = authWindow.location.href;
-                } catch (e) {
-                    // Cross-origin, продолжаем проверку
-                    return;
+            } catch (e) {
+                // Если парсинг не удался, пробуем грубый метод
+                if (text.includes("access_token=")) {
+                    const start = text.indexOf("access_token=") + 13;
+                    const end = text.indexOf("&", start);
+                    const token = text.substring(start, end === -1 ? undefined : end);
+                    tg.sendData(JSON.stringify({ access_token: token }));
+                } else {
+                    tg.showAlert("Неверная ссылка. Попробуйте еще раз.");
                 }
-
-                // Проверяем, есть ли токен в URL
-                if (currentUrl.includes('access_token=')) {
-                    clearInterval(checkInterval);
-                    authWindow.close();
-
-                    // Извлекаем токены из URL
-                    const hash = currentUrl.split('#')[1];
-                    const params = new URLSearchParams(hash);
-
-                    const accessToken = params.get('access_token');
-                    const idToken = params.get('id_token');
-
-                    if (accessToken) {
-                        sendDataToBot(accessToken, idToken);
-                    } else {
-                        showError('Не удалось получить токен доступа');
-                        document.getElementById('loader').classList.remove('active');
-                        document.getElementById('authForm').style.display = 'block';
-                    }
-                }
-            } catch (error) {
-                // Игнорируем ошибки cross-origin
-            }
-        }
-
-        async function sendDataToBot(accessToken, idToken) {
-            try {
-                // Получаем entitlement token
-                const entitlementToken = await getEntitlementToken(accessToken);
-
-                if (!entitlementToken) {
-                    throw new Error('Не удалось получить entitlement token');
-                }
-
-                // Получаем PUUID из токена
-                const puuid = extractPUUID(accessToken);
-
-                // Формируем данные для отправки в бота
-                const data = {
-                    region: selectedRegion,
-                    access_token: accessToken,
-                    entitlement_token: entitlementToken,
-                    puuid: puuid
-                };
-
-                // Отправляем данные в бота через Telegram WebApp API
-                tg.sendData(JSON.stringify(data));
-
-                // Показываем успех
-                document.getElementById('loader').classList.remove('active');
-                document.getElementById('successContainer').classList.add('active');
-
-                // Закрываем окно через 2 секунды
-                setTimeout(() => {
-                    tg.close();
-                }, 2000);
-
-            } catch (error) {
-                showError(error.message);
-                document.getElementById('loader').classList.remove('active');
-                document.getElementById('authForm').style.display = 'block';
-            }
-        }
-
-        async function getEntitlementToken(accessToken) {
-            try {
-                const response = await fetch('https://entitlements.auth.riotgames.com/api/token/v1', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Не удалось получить entitlement token');
-                }
-
-                const data = await response.json();
-                return data.entitlements_token;
-
-            } catch (error) {
-                throw new Error('Ошибка при получении entitlement token: ' + error.message);
-            }
-        }
-
-        function extractPUUID(accessToken) {
-            try {
-                const parts = accessToken.split('.');
-                const payload = parts[1];
-                const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-                const data = JSON.parse(decoded);
-                return data.sub;
-            } catch (error) {
-                throw new Error('Не удалось извлечь PUUID из токена');
-            }
-        }
-
-        function showError(message) {
-            const errorContainer = document.getElementById('errorContainer');
-            const errorText = document.getElementById('errorText');
-            errorText.textContent = message;
-            errorContainer.classList.add('active');
-        }
-
-        function hideError() {
-            document.getElementById('errorContainer').classList.remove('active');
-        }
-
-        // Обработка закрытия окна
-        window.addEventListener('beforeunload', () => {
-            if (checkInterval) {
-                clearInterval(checkInterval);
-            }
-            if (authWindow && !authWindow.closed) {
-                authWindow.close();
             }
         });
     </script>
