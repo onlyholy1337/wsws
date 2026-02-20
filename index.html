@@ -12,7 +12,6 @@
         .tabs button.active { background: #ff4655; color: #fff; }
         .tab { display: none; }
         .tab.active { display: block; }
-        
         input { width: 100%; padding: 12px; margin-bottom: 12px; box-sizing: border-box; background: var(--tg-theme-secondary-bg-color, #2c2c2e); color: var(--tg-theme-text-color, #fff); border: 1px solid #444; border-radius: 8px; outline: none; }
         input:focus { border-color: #ff4655; }
         .btn-main { width: 100%; padding: 14px; background: #ff4655; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px; }
@@ -24,7 +23,7 @@
     <h2 style="text-align: center; color: #ff4655; margin-top: 0;">Магазин Valorant</h2>
 
     <div class="tabs">
-        <button class="active" onclick="switchTab('tab-token')">По Ссылке (100%)</button>
+        <button class="active" onclick="switchTab('tab-token')">Через Браузер (100%)</button>
         <button onclick="switchTab('tab-cred')">Логин / Пароль</button>
     </div>
 
@@ -32,17 +31,15 @@
         <div class="alert">
             <b>КАК ВОЙТИ:</b><br><br>
             1. Нажми кнопку "Войти в Riot Games".<br>
-            2. Войди в аккаунт. Страница зависнет и выдаст ошибку браузера <b>"Сайт недоступен (localhost)"</b>. Это НОРМАЛЬНО, так и должно быть!<br>
-            3. Кликни по <b>АДРЕСНОЙ СТРОКЕ</b> сверху и <b>скопируй всю длинную ссылку целиком</b> (Она не должна начинаться с <code style="color: gray;">&lt;!DOCTYPE html&gt;</code>).<br>
-            4. Вставь её ниже, либо <b>просто отправь её сообщением боту в чат!</b>
+            2. Войди в свой аккаунт (пройди 2FA если нужно).<br>
+            3. После входа страница зависнет на ошибке <b>"Сайт недоступен" (localhost)</b>. Это так и задумано!<br>
+            4. Кликни по <b>АДРЕСНОЙ СТРОКЕ</b> браузера сверху, скопируй длинную ссылку целиком и <b>отправь её боту в чат!</b>
         </div>
         <button class="btn-main btn-secondary" onclick="openAuth()">Войти в Riot Games</button>
-        <input type="text" id="url_input" placeholder="Вставь ссылку (http://localhost/redirect#...)">
-        <button class="btn-main" onclick="sendToken()">Показать магазин</button>
     </div>
 
     <div id="tab-cred" class="tab">
-        <div class="alert" style="border-left-color: gray;">⚠️ Этот метод не сработает, если у тебя включена двухфакторная аутентификация (2FA) или Riot покажет скрытую капчу.</div>
+        <div class="alert" style="border-left-color: gray;">⚠️ Этот метод не сработает, если у тебя включена аутентификация по коду на почту (2FA) или Riot покажет скрытую капчу.</div>
         <input type="text" id="username" placeholder="Riot ID (Логин)">
         <input type="password" id="password" placeholder="Пароль">
         <button class="btn-main" onclick="sendCreds()">Войти</button>
@@ -60,17 +57,9 @@
         }
 
         function openAuth() {
-            // ИСПОЛЬЗУЕМ LOCALHOST ДЛЯ ИЗБЕЖАНИЯ 404 РЕДИРЕКТА. 
-            // Браузер выдаст ошибку "Сервер не найден", и ссылка останется нетронутой!
-            tg.openLink("https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1&scope=account%20openid");
-        }
-
-        function sendToken() {
-            const url = document.getElementById('url_input').value.trim();
-            if (!url.includes("access_token=")) return tg.showAlert("❌ В ссылке нет токена! Убедись, что скопировал её из адресной строки (сверху) на странице с ошибкой 'Сайт недоступен'.");
-            
-            tg.sendData(JSON.stringify({type: "token", url: url}));
-            tg.close();
+            // ИСПОЛЬЗУЕМ КЛИЕНТ ОФИЦИАЛЬНОГО ЛАУНЧЕРА (riot-client)
+            // У него официально разрешен redirect_uri=http://localhost/redirect
+            tg.openLink("https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&client_id=riot-client&response_type=token%20id_token&nonce=1&scope=account%20openid");
         }
 
         function sendCreds() {
